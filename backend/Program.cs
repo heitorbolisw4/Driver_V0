@@ -88,5 +88,6 @@ app.MapTruckEndpoints();
 app.MapRouteEndpoints();
 app.MapExpenseCategoryEndpoints();
 app.MapExpenseEndpoints();
+app.MapOdometerReadingEndpoints();
 
 app.Run();
