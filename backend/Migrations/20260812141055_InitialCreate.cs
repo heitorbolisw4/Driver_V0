@@ -18,10 +18,10 @@ namespace backend.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    Email = table.Column<string>(type: "text", nullable: false),
-                    Password = table.Column<string>(type: "text", nullable: false),
-                    IsActive = table.Column<bool>(type: "boolean", nullable: false)
+                    Name = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
+                    Email = table.Column<string>(type: "character varying(180)", maxLength: 180, nullable: false),
+                    Password = table.Column<string>(type: "character varying(60)", maxLength: 60, nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true)
                 },
                 constraints: table =>
                 {
@@ -34,7 +34,7 @@ namespace backend.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Plate = table.Column<string>(type: "text", nullable: false),
+                    Plate = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: false),
                     Hodometer = table.Column<float>(type: "real", nullable: false)
                 },
                 constraints: table =>
@@ -48,20 +48,21 @@ namespace backend.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Type = table.Column<string>(type: "text", nullable: false),
+                    Type = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Weight = table.Column<float>(type: "real", nullable: false),
-                    IsShipped = table.Column<bool>(type: "boolean", nullable: false),
+                    IsShipped = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
                     DriverId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_TruckLoads", x => x.Id);
+                    table.CheckConstraint("CK_TruckLoad_Weight_Positive", "\"Weight\" > 0");
                     table.ForeignKey(
                         name: "FK_TruckLoads_Drivers_DriverId",
                         column: x => x.DriverId,
                         principalTable: "Drivers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -72,12 +73,13 @@ namespace backend.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Value = table.Column<float>(type: "real", nullable: false),
                     ReadingDate = table.Column<DateOnly>(type: "date", nullable: false),
-                    Note = table.Column<string>(type: "text", nullable: true),
+                    Note = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     TruckId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_OdometerReadings", x => x.Id);
+                    table.CheckConstraint("CK_OdometerReading_Value_NonNegative", "\"Value\" >= 0");
                     table.ForeignKey(
                         name: "FK_OdometerReadings_Trucks_TruckId",
                         column: x => x.TruckId,
@@ -92,12 +94,12 @@ namespace backend.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    RouteName = table.Column<string>(type: "text", nullable: false),
+                    RouteName = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
                     Kilometers = table.Column<float>(type: "real", nullable: false),
                     KilometersCovered = table.Column<float>(type: "real", nullable: true),
                     StartDate = table.Column<DateOnly>(type: "date", nullable: false),
                     EndDate = table.Column<DateOnly>(type: "date", nullable: true),
-                    InProcess = table.Column<bool>(type: "boolean", nullable: false),
+                    InProcess = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
                     DriverId = table.Column<int>(type: "integer", nullable: false),
                     TruckLoadId = table.Column<int>(type: "integer", nullable: true),
                     TruckId = table.Column<int>(type: "integer", nullable: true)
@@ -105,23 +107,34 @@ namespace backend.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Routes", x => x.Id);
+                    table.CheckConstraint("CK_Route_EndDate_AfterStartDate", "\"EndDate\" IS NULL OR \"EndDate\" >= \"StartDate\"");
+                    table.CheckConstraint("CK_Route_Kilometers_NonNegative", "\"Kilometers\" >= 0");
+                    table.CheckConstraint("CK_Route_KilometersCovered_NonNegative", "\"KilometersCovered\" IS NULL OR \"KilometersCovered\" >= 0");
                     table.ForeignKey(
                         name: "FK_Routes_Drivers_DriverId",
                         column: x => x.DriverId,
                         principalTable: "Drivers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Routes_TruckLoads_TruckLoadId",
                         column: x => x.TruckLoadId,
                         principalTable: "TruckLoads",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "FK_Routes_Trucks_TruckId",
                         column: x => x.TruckId,
                         principalTable: "Trucks",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Drivers_Email",
+                table: "Drivers",
+                column: "Email",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_OdometerReadings_TruckId",
@@ -147,6 +160,12 @@ namespace backend.Migrations
                 name: "IX_TruckLoads_DriverId",
                 table: "TruckLoads",
                 column: "DriverId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Trucks_Plate",
+                table: "Trucks",
+                column: "Plate",
+                unique: true);
         }
 
         /// <inheritdoc />

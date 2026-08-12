@@ -17,7 +17,7 @@ namespace backend.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.10")
+                .HasAnnotation("ProductVersion", "9.0.19")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -32,20 +32,28 @@ namespace backend.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(180)
+                        .HasColumnType("character varying(180)");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
 
                     b.Property<string>("Password")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
 
                     b.ToTable("Drivers");
                 });
@@ -59,7 +67,8 @@ namespace backend.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Note")
-                        .HasColumnType("text");
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<DateOnly>("ReadingDate")
                         .HasColumnType("date");
@@ -74,7 +83,10 @@ namespace backend.Migrations
 
                     b.HasIndex("TruckId");
 
-                    b.ToTable("OdometerReadings");
+                    b.ToTable("OdometerReadings", t =>
+                        {
+                            t.HasCheckConstraint("CK_OdometerReading_Value_NonNegative", "\"Value\" >= 0");
+                        });
                 });
 
             modelBuilder.Entity("backend.Entities.Route", b =>
@@ -92,7 +104,9 @@ namespace backend.Migrations
                         .HasColumnType("date");
 
                     b.Property<bool>("InProcess")
-                        .HasColumnType("boolean");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
 
                     b.Property<float>("Kilometers")
                         .HasColumnType("real");
@@ -102,7 +116,8 @@ namespace backend.Migrations
 
                     b.Property<string>("RouteName")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
 
                     b.Property<DateOnly>("StartDate")
                         .HasColumnType("date");
@@ -121,7 +136,14 @@ namespace backend.Migrations
 
                     b.HasIndex("TruckLoadId");
 
-                    b.ToTable("Routes");
+                    b.ToTable("Routes", t =>
+                        {
+                            t.HasCheckConstraint("CK_Route_EndDate_AfterStartDate", "\"EndDate\" IS NULL OR \"EndDate\" >= \"StartDate\"");
+
+                            t.HasCheckConstraint("CK_Route_KilometersCovered_NonNegative", "\"KilometersCovered\" IS NULL OR \"KilometersCovered\" >= 0");
+
+                            t.HasCheckConstraint("CK_Route_Kilometers_NonNegative", "\"Kilometers\" >= 0");
+                        });
                 });
 
             modelBuilder.Entity("backend.Entities.Truck", b =>
@@ -137,9 +159,13 @@ namespace backend.Migrations
 
                     b.Property<string>("Plate")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Plate")
+                        .IsUnique();
 
                     b.ToTable("Trucks");
                 });
@@ -156,11 +182,14 @@ namespace backend.Migrations
                         .HasColumnType("integer");
 
                     b.Property<bool>("IsShipped")
-                        .HasColumnType("boolean");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<float>("Weight")
                         .HasColumnType("real");
@@ -169,7 +198,10 @@ namespace backend.Migrations
 
                     b.HasIndex("DriverId");
 
-                    b.ToTable("TruckLoads");
+                    b.ToTable("TruckLoads", t =>
+                        {
+                            t.HasCheckConstraint("CK_TruckLoad_Weight_Positive", "\"Weight\" > 0");
+                        });
                 });
 
             modelBuilder.Entity("backend.Entities.OdometerReading", b =>
@@ -188,16 +220,18 @@ namespace backend.Migrations
                     b.HasOne("backend.Entities.Driver", "Driver")
                         .WithMany("Routes")
                         .HasForeignKey("DriverId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("backend.Entities.Truck", "Truck")
                         .WithMany("Routes")
-                        .HasForeignKey("TruckId");
+                        .HasForeignKey("TruckId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("backend.Entities.TruckLoad", "TruckLoad")
                         .WithMany("Routes")
-                        .HasForeignKey("TruckLoadId");
+                        .HasForeignKey("TruckLoadId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Driver");
 
@@ -211,7 +245,7 @@ namespace backend.Migrations
                     b.HasOne("backend.Entities.Driver", "Driver")
                         .WithMany("TruckLoads")
                         .HasForeignKey("DriverId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Driver");
