@@ -11,6 +11,11 @@ public class Route
     // Nulo enquanto a rota estiver em andamento; apurado ao encerrar a rota.
     public float? KilometersCovered { get; set; }
 
+    // RN-10: copiado automaticamente de Truck.Hodometer na abertura da rota.
+    // Precisa ser persistido aqui porque o hodômetro do caminhão segue avançando
+    // em rotas futuras — sem isso, RN-13 não seria mais calculável depois.
+    public float StartOdometer { get; set; }
+
     public DateOnly StartDate { get; set; }
 
     // Nula enquanto a rota estiver em andamento (InProcess = true).

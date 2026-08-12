@@ -85,5 +85,8 @@ app.MapAuthEndpoints();
 app.MapUserEndpoints();
 app.MapTruckLoadEndpoints();
 app.MapTruckEndpoints();
+app.MapRouteEndpoints();
+app.MapExpenseCategoryEndpoints();
+app.MapExpenseEndpoints();
 
 app.Run();

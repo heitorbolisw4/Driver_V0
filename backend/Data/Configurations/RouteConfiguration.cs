@@ -16,6 +16,9 @@ public class RouteConfiguration : IEntityTypeConfiguration<Route>
         builder.Property(r => r.Kilometers)
             .IsRequired();
 
+        builder.Property(r => r.StartOdometer)
+            .IsRequired();
+
         builder.Property(r => r.StartDate)
             .IsRequired();
 
@@ -39,6 +42,7 @@ public class RouteConfiguration : IEntityTypeConfiguration<Route>
         {
             t.HasCheckConstraint("CK_Route_Kilometers_NonNegative", "\"Kilometers\" >= 0");
             t.HasCheckConstraint("CK_Route_KilometersCovered_NonNegative", "\"KilometersCovered\" IS NULL OR \"KilometersCovered\" >= 0");
+            t.HasCheckConstraint("CK_Route_StartOdometer_NonNegative", "\"StartOdometer\" >= 0");
             t.HasCheckConstraint("CK_Route_EndDate_AfterStartDate", "\"EndDate\" IS NULL OR \"EndDate\" >= \"StartDate\"");
         });
     }
