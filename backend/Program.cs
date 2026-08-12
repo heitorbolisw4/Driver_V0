@@ -20,6 +20,10 @@ var jwtSection = builder.Configuration.GetSection("Jwt");
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        // Mantém os claims com o nome curto original ("sub", "email") em vez de
+        // remapear pras URIs longas legadas do WS-Federation.
+        options.MapInboundClaims = false;
+
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -78,5 +82,6 @@ app.UseAuthorization();
 
 app.MapGet("/", () => "Hello World!");
 app.MapAuthEndpoints();
+app.MapUserEndpoints();
 
 app.Run();
