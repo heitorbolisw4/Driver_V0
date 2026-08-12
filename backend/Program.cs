@@ -1,7 +1,8 @@
 using backend.Data;
+using backend.Endpoints;
 using backend.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,9 +27,19 @@ builder.Services.AddSwaggerGen(options =>
         Description = "Informe apenas o token JWT (sem o prefixo \"Bearer \")."
     });
 
-    options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
-        { new OpenApiSecuritySchemeReference("Bearer", document), [] }
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            []
+        }
     });
 });
 
@@ -41,5 +52,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapGet("/", () => "Hello World!");
+app.MapAuthEndpoints();
 
 app.Run();
