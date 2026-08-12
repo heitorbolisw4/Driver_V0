@@ -14,7 +14,8 @@ public class TruckConfiguration : IEntityTypeConfiguration<Truck>
             .IsRequired()
             .HasMaxLength(10);
 
-        builder.HasIndex(t => t.Plate)
+        // RN-05: a placa deve ser única por motorista, não globalmente.
+        builder.HasIndex(t => new { t.DriverId, t.Plate })
             .IsUnique();
 
         builder.Property(t => t.Hodometer)
@@ -33,5 +34,9 @@ public class TruckConfiguration : IEntityTypeConfiguration<Truck>
             .WithOne(o => o.Truck)
             .HasForeignKey(o => o.TruckId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // RN-06: hodômetro inicial deve ser >= 0.
+        builder.ToTable(t =>
+            t.HasCheckConstraint("CK_Truck_Hodometer_NonNegative", "\"Hodometer\" >= 0"));
     }
 }

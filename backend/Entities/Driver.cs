@@ -12,5 +12,6 @@ public class Driver
 
     public ICollection<Route> Routes { get; set; } = [];
     public ICollection<TruckLoad> TruckLoads { get; set; } = [];
+    public ICollection<Truck> Trucks { get; set; } = [];
     public ICollection<ExpenseCategory> ExpenseCategories { get; set; } = [];
 }

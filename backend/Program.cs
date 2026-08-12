@@ -84,5 +84,6 @@ app.MapGet("/", () => "Hello World!");
 app.MapAuthEndpoints();
 app.MapUserEndpoints();
 app.MapTruckLoadEndpoints();
+app.MapTruckEndpoints();
 
 app.Run();
