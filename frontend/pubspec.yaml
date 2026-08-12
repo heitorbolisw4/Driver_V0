@@ -35,6 +35,12 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
 
+  # Client HTTP pra falar com o backend .NET.
+  http: ^1.2.0
+  # Armazenamento criptografado (Keystore/Keychain) pro token JWT — não usar
+  # SharedPreferences puro pra isso.
+  flutter_secure_storage: ^9.2.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -1,4 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Necessária em qualquer variante de build (inclusive release) porque
+         o app fala com a API do backend. A permissão do debug/AndroidManifest.xml
+         é só pro tooling do Flutter (hot reload etc), não cobre release. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+
     <application
         android:label="frontend"
         android:name="${applicationName}"

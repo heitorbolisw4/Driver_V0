@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Libera tráfego HTTP não criptografado apenas pro host do backend local
+  durante desenvolvimento. 10.0.2.2 é o alias que o emulador Android usa pro
+  localhost da máquina host (ver ApiClient._defaultBaseUrl).
+
+  Isso só existe no build de debug (android/app/src/debug/) — nunca copiar
+  esse arquivo ou a referência a ele pro AndroidManifest.xml principal.
+-->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">10.0.2.2</domain>
+        <!--
+          Testando em aparelho físico na mesma rede Wi-Fi? "localhost" nem
+          "10.0.2.2" funcionam nesse caso — adicione aqui o IP da sua máquina
+          na rede local, ex:
+            <domain includeSubdomains="false">192.168.0.10</domain>
+          e rode com a flag dart-define API_BASE_URL=http://192.168.0.10:5248
+          Lembrando que o Kestrel, por padrão, só escuta em localhost — pra
+          um dispositivo físico alcançar o backend, o launchSettings.json
+          precisa expor a porta também no IP da rede (ou 0.0.0.0), não só
+          "localhost".
+        -->
+    </domain-config>
+</network-security-config>
