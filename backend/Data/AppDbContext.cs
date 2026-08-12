@@ -10,6 +10,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Route> Routes => Set<Route>();
     public DbSet<TruckLoad> TruckLoads => Set<TruckLoad>();
     public DbSet<OdometerReading> OdometerReadings => Set<OdometerReading>();
+    public DbSet<ExpenseCategory> ExpenseCategories => Set<ExpenseCategory>();
+    public DbSet<Expense> Expenses => Set<Expense>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -26,6 +26,15 @@ public class RouteConfiguration : IEntityTypeConfiguration<Route>
         // As FKs para Driver, Truck e TruckLoad já são configuradas a partir
         // do lado "1" de cada relação (DriverConfiguration, TruckConfiguration,
         // TruckLoadConfiguration), então aqui só ficam as regras próprias da Route.
+
+        // RN-19: gasto só existe em função da rota; sem ela o lançamento não
+        // tem mais sentido (regra de exclusão em cascata ainda não confirmada
+        // com o cliente — ver Seção 8 do documento de regras de negócio).
+        builder.HasMany(r => r.Expenses)
+            .WithOne(e => e.Route)
+            .HasForeignKey(e => e.RouteId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         builder.ToTable(t =>
         {
             t.HasCheckConstraint("CK_Route_Kilometers_NonNegative", "\"Kilometers\" >= 0");

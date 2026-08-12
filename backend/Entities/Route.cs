@@ -25,4 +25,6 @@ public class Route
 
     public int? TruckId { get; set; }
     public Truck? Truck { get; set; }
+
+    public ICollection<Expense> Expenses { get; set; } = [];
 }
